@@ -32,6 +32,7 @@ then order or print the exact sheet size.
 The project also provides a Python/Pillow CLI. The browser surface is static
 HTML, CSS, and JavaScript without a build step. Both support physical
 dimensions, spacing, borders, DPI, orientation, and copy limits. Browser
+exports JPEG and PNG, with WebP where browser support exists; browser
 dimensions and export resolution are subject to safe local processing limits.
 Country-specific photo requirements remain the user's responsibility.
 

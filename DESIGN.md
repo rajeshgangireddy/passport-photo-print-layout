@@ -38,9 +38,15 @@ stacks into a single column, with paired measurement fields retained where
 they remain legible. Controls use crisp borders, compact spacing, and a visible
 Energy Blue keyboard-focus outline.
 
+Each editable setting has a small reset icon beside its label; it is inactive
+when that setting already matches its default. Export format is chosen next to
+the download action, with a short note about compatibility and metadata.
+
 The live Canvas preview is the primary output. Its summary names sheet pixels
 and physical dimensions, grid, copy count, photo box, cut cell, gap, margin,
-and orientation. Warnings and errors use text in addition to color.
+orientation, and file format. JPEG and PNG include print-density metadata;
+WebP is offered where supported as a compact alternative without print-DPI
+metadata. Warnings and errors use text in addition to color.
 
 ## Accessibility and responsive behavior
 

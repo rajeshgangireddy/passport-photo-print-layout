@@ -7,6 +7,43 @@ const MAX_OUTPUT_EDGE = 10_000;
 const MAX_IMAGE_EDGE = 6_000;
 const MAX_IMAGE_PIXELS = 24_000_000;
 const JPEG_SCAN_BYTES = 2 * 1024 * 1024;
+const DEFAULTS = Object.freeze({
+  photoWidth: 35,
+  photoHeight: 45,
+  pageWidth: 100,
+  pageHeight: 150,
+  borderWidth: 0.5,
+  borderColor: "#000000",
+  photoGap: 1,
+  pageMargin: 1.5,
+  resolution: 300,
+  orientation: "auto",
+  copyCount: 4,
+  outputFormat: "jpeg",
+});
+const OUTPUT_FORMATS = Object.freeze({
+  jpeg: {
+    label: "JPEG",
+    mime: "image/jpeg",
+    extension: "jpg",
+    quality: 0.95,
+    help: "Widely accepted by kiosks; embeds print DPI.",
+  },
+  png: {
+    label: "PNG",
+    mime: "image/png",
+    extension: "png",
+    quality: undefined,
+    help: "Lossless quality; embeds print DPI.",
+  },
+  webp: {
+    label: "WebP",
+    mime: "image/webp",
+    extension: "webp",
+    quality: 0.92,
+    help: "Compact; some kiosks do not accept it. DPI metadata is not embedded.",
+  },
+});
 
 const elements = {
   imageFile: document.querySelector("#image-file"),
@@ -29,6 +66,9 @@ const elements = {
   copyCount: document.querySelector("#copy-count"),
   fillSheet: document.querySelector("#fill-sheet"),
   limitCopies: document.querySelector("#limit-copies"),
+  outputFormat: document.querySelector("#output-format"),
+  webpOption: document.querySelector("#output-format option[value='webp']"),
+  formatHelp: document.querySelector("#format-help"),
   downloadImage: document.querySelector("#download-image"),
   canvas: document.querySelector("#sheet-canvas"),
   emptyPreview: document.querySelector("#empty-preview"),
@@ -44,6 +84,7 @@ const elements = {
   summaryCell: document.querySelector("#summary-cell"),
   summarySpacing: document.querySelector("#summary-spacing"),
   summaryOrientation: document.querySelector("#summary-orientation"),
+  summaryFormat: document.querySelector("#summary-format"),
 };
 
 const state = {
@@ -131,6 +172,144 @@ function updateSummary(layout) {
   const orientationSource = elements.orientation.value === "auto" ? "automatic" : "forced";
   elements.summaryOrientation.textContent =
     `${layout.orientation} · ${orientationSource}`;
+  elements.summaryFormat.textContent = OUTPUT_FORMATS[elements.outputFormat.value].label;
+}
+
+function isSettingDefault(setting) {
+  switch (setting) {
+    case "photo-preset":
+      return elements.photoPreset.value === "35x45";
+    case "photo-width":
+      return elements.photoWidth.valueAsNumber === DEFAULTS.photoWidth;
+    case "photo-height":
+      return elements.photoHeight.valueAsNumber === DEFAULTS.photoHeight;
+    case "page-preset":
+      return elements.pagePreset.value === "100x150";
+    case "page-width":
+      return elements.pageWidth.valueAsNumber === DEFAULTS.pageWidth;
+    case "page-height":
+      return elements.pageHeight.valueAsNumber === DEFAULTS.pageHeight;
+    case "border-width":
+      return elements.borderWidth.valueAsNumber === DEFAULTS.borderWidth;
+    case "border-color":
+      return elements.borderColor.value.toLowerCase() === DEFAULTS.borderColor;
+    case "photo-gap":
+      return elements.photoGap.valueAsNumber === DEFAULTS.photoGap;
+    case "page-margin":
+      return elements.pageMargin.valueAsNumber === DEFAULTS.pageMargin;
+    case "resolution":
+      return elements.resolution.valueAsNumber === DEFAULTS.resolution;
+    case "orientation":
+      return elements.orientation.value === DEFAULTS.orientation;
+    case "copy-mode":
+      return elements.fillSheet.checked && elements.copyCount.valueAsNumber === DEFAULTS.copyCount;
+    case "copy-count":
+      return elements.copyCount.valueAsNumber === DEFAULTS.copyCount;
+    case "format":
+      return elements.outputFormat.value === DEFAULTS.outputFormat;
+    default:
+      throw new Error(`Unknown reset setting: ${setting}`);
+  }
+}
+
+function updateResetButtons() {
+  document.querySelectorAll("[data-reset]").forEach((button) => {
+    button.disabled = isSettingDefault(button.dataset.reset);
+  });
+}
+
+function updateFormatControl() {
+  const format = OUTPUT_FORMATS[elements.outputFormat.value];
+  elements.formatHelp.textContent = format.help;
+  elements.downloadImage.textContent = `Download ${format.label}`;
+}
+
+function detectWebpExportSupport() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  if (typeof canvas.toBlob !== "function") return Promise.resolve(false);
+
+  return new Promise((resolve) => {
+    try {
+      canvas.toBlob((blob) => resolve(blob?.type === "image/webp"), "image/webp", 0.8);
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+function setInputValue(input, value) {
+  input.value = String(value);
+  input.setAttribute("aria-invalid", String(!input.validity.valid));
+}
+
+function resetSetting(setting) {
+  switch (setting) {
+    case "photo-preset":
+      elements.photoPreset.value = "35x45";
+      toggleCustomFields(elements.photoPreset, elements.photoWidth, elements.photoHeight, false);
+      break;
+    case "photo-width":
+      elements.photoPreset.value = "custom";
+      toggleCustomFields(elements.photoPreset, elements.photoWidth, elements.photoHeight, true);
+      setInputValue(elements.photoWidth, DEFAULTS.photoWidth);
+      break;
+    case "photo-height":
+      elements.photoPreset.value = "custom";
+      toggleCustomFields(elements.photoPreset, elements.photoWidth, elements.photoHeight, true);
+      setInputValue(elements.photoHeight, DEFAULTS.photoHeight);
+      break;
+    case "page-preset":
+      elements.pagePreset.value = "100x150";
+      toggleCustomFields(elements.pagePreset, elements.pageWidth, elements.pageHeight, false);
+      break;
+    case "page-width":
+      elements.pagePreset.value = "custom";
+      toggleCustomFields(elements.pagePreset, elements.pageWidth, elements.pageHeight, true);
+      setInputValue(elements.pageWidth, DEFAULTS.pageWidth);
+      break;
+    case "page-height":
+      elements.pagePreset.value = "custom";
+      toggleCustomFields(elements.pagePreset, elements.pageWidth, elements.pageHeight, true);
+      setInputValue(elements.pageHeight, DEFAULTS.pageHeight);
+      break;
+    case "border-width":
+      setInputValue(elements.borderWidth, DEFAULTS.borderWidth);
+      break;
+    case "border-color":
+      elements.borderColor.value = DEFAULTS.borderColor;
+      break;
+    case "photo-gap":
+      setInputValue(elements.photoGap, DEFAULTS.photoGap);
+      break;
+    case "page-margin":
+      setInputValue(elements.pageMargin, DEFAULTS.pageMargin);
+      break;
+    case "resolution":
+      setInputValue(elements.resolution, DEFAULTS.resolution);
+      break;
+    case "orientation":
+      elements.orientation.value = DEFAULTS.orientation;
+      break;
+    case "copy-mode":
+      elements.fillSheet.checked = true;
+      elements.limitCopies.checked = false;
+      elements.copyCount.disabled = true;
+      setInputValue(elements.copyCount, DEFAULTS.copyCount);
+      break;
+    case "copy-count":
+      setInputValue(elements.copyCount, DEFAULTS.copyCount);
+      break;
+    case "format":
+      elements.outputFormat.value = DEFAULTS.outputFormat;
+      break;
+    default:
+      throw new Error(`Unknown reset setting: ${setting}`);
+  }
+
+  setMessage(elements.downloadMessage, "");
+  renderLayout();
 }
 
 function outputDimensionsExceedLimit(layout) {
@@ -229,6 +408,8 @@ function updateDownloadState() {
 }
 
 function renderLayout() {
+  updateFormatControl();
+  updateResetButtons();
   try {
     state.layout = calculateLayout(readSettings());
   } catch (error) {
@@ -278,6 +459,8 @@ function toggleCustomFields(preset, widthInput, heightInput, isCustom) {
   const [width, height] = preset.value.split("x").map(Number);
   widthInput.value = String(width);
   heightInput.value = String(height);
+  widthInput.setAttribute("aria-invalid", String(!widthInput.validity.valid));
+  heightInput.setAttribute("aria-invalid", String(!heightInput.validity.valid));
 }
 
 function resizeDimensions(width, height) {
@@ -526,35 +709,121 @@ function setJfifDensity(jpeg, dpi) {
   return output;
 }
 
+function readUint32(bytes, offset) {
+  return bytes[offset] * 0x1000000
+    + bytes[offset + 1] * 0x10000
+    + bytes[offset + 2] * 0x100
+    + bytes[offset + 3];
+}
+
+function writeUint32(bytes, offset, value) {
+  const unsigned = value >>> 0;
+  bytes[offset] = (unsigned >>> 24) & 0xff;
+  bytes[offset + 1] = (unsigned >>> 16) & 0xff;
+  bytes[offset + 2] = (unsigned >>> 8) & 0xff;
+  bytes[offset + 3] = unsigned & 0xff;
+}
+
+function pngCrc32(bytes, start, end) {
+  let crc = 0xffffffff;
+  for (let index = start; index < end; index += 1) {
+    crc ^= bytes[index];
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function createPngPhysChunk(pixelsPerMeter) {
+  const chunk = new Uint8Array(21);
+  writeUint32(chunk, 0, 9);
+  chunk.set([0x70, 0x48, 0x59, 0x73], 4);
+  writeUint32(chunk, 8, pixelsPerMeter);
+  writeUint32(chunk, 12, pixelsPerMeter);
+  chunk[16] = 1;
+  writeUint32(chunk, 17, pngCrc32(chunk, 4, 17));
+  return chunk;
+}
+
+function setPngDensity(png, dpi) {
+  const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (!signature.every((byte, index) => png[index] === byte)) {
+    throw new Error("The browser did not return a valid PNG image.");
+  }
+
+  const pixelsPerMeter = Math.round(dpi * 10_000 / 254);
+  let offset = signature.length;
+  while (offset + 12 <= png.length) {
+    const chunkLength = readUint32(png, offset);
+    const dataOffset = offset + 8;
+    const chunkEnd = dataOffset + chunkLength + 4;
+    if (chunkEnd > png.length) throw new Error("The browser returned an incomplete PNG image.");
+
+    const chunkType = String.fromCharCode(...png.subarray(offset + 4, offset + 8));
+    if (chunkType === "pHYs") {
+      if (chunkLength !== 9) throw new Error("The PNG print-density metadata is invalid.");
+      const output = png.slice();
+      writeUint32(output, dataOffset, pixelsPerMeter);
+      writeUint32(output, dataOffset + 4, pixelsPerMeter);
+      output[dataOffset + 8] = 1;
+      writeUint32(output, dataOffset + chunkLength, pngCrc32(output, offset + 4, dataOffset + chunkLength));
+      return output;
+    }
+
+    if (chunkType === "IDAT") {
+      const chunk = createPngPhysChunk(pixelsPerMeter);
+      const output = new Uint8Array(png.length + chunk.length);
+      output.set(png.subarray(0, offset), 0);
+      output.set(chunk, offset);
+      output.set(png.subarray(offset), offset + chunk.length);
+      return output;
+    }
+
+    offset = chunkEnd;
+  }
+
+  throw new Error("The browser returned a PNG image without image data.");
+}
+
 async function downloadSheet() {
   if (!state.source || !state.layout || elements.downloadImage.disabled) return;
   const layout = state.layout;
+  const format = OUTPUT_FORMATS[elements.outputFormat.value];
   elements.downloadImage.disabled = true;
   setMessage(elements.downloadMessage, "");
 
   try {
     const blob = await new Promise((resolve, reject) => {
       elements.canvas.toBlob(
-        (result) => result ? resolve(result) : reject(new Error("The browser could not encode the print sheet as JPEG.")),
-        "image/jpeg",
-        0.95,
+        (result) => result ? resolve(result) : reject(new Error(`The browser could not encode the print sheet as ${format.label}.`)),
+        format.mime,
+        format.quality,
       );
     });
-    const jpeg = new Uint8Array(await blob.arrayBuffer());
-    const taggedJpeg = setJfifDensity(jpeg, layout.dpi);
-    const output = new Blob([taggedJpeg], { type: "image/jpeg" });
+    if (blob.type !== format.mime) {
+      throw new Error(`${format.label} export is not supported by this browser. Choose JPEG or PNG instead.`);
+    }
+
+    let imageData = new Uint8Array(await blob.arrayBuffer());
+    if (elements.outputFormat.value === "jpeg") {
+      imageData = setJfifDensity(imageData, layout.dpi);
+    } else if (elements.outputFormat.value === "png") {
+      imageData = setPngDensity(imageData, layout.dpi);
+    }
+    const output = new Blob([imageData], { type: format.mime });
     const url = URL.createObjectURL(output);
     const link = document.createElement("a");
     const width = formatNumber(layout.pageWidthMm).replace(".", "p");
     const height = formatNumber(layout.pageHeightMm).replace(".", "p");
     link.href = url;
-    link.download = `passport-photo-sheet-${width}x${height}mm-${layout.dpi}dpi.jpg`;
+    link.download = `passport-photo-sheet-${width}x${height}mm-${layout.dpi}dpi.${format.extension}`;
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setMessage(
-      elements.downloadMessage,
-      `JPEG saved at ${layout.dpi} DPI with the sheet dimensions embedded in its image data.`,
-    );
+    const successMessage = elements.outputFormat.value === "webp"
+      ? `WebP saved at ${layout.dpi} DPI-equivalent resolution. WebP does not embed print DPI; use JPEG or PNG for kiosks that need it.`
+      : `${format.label} saved at ${layout.dpi} DPI with print-density metadata.`;
+    setMessage(elements.downloadMessage, successMessage);
   } catch (error) {
     setMessage(
       elements.downloadMessage,
@@ -573,6 +842,11 @@ elements.imageFile.addEventListener("change", () => {
 });
 elements.clearPhoto.addEventListener("click", clearPhoto);
 elements.downloadImage.addEventListener("click", downloadSheet);
+elements.outputFormat.addEventListener("change", renderLayout);
+
+document.querySelectorAll("[data-reset]").forEach((button) => {
+  button.addEventListener("click", () => resetSetting(button.dataset.reset));
+});
 
 elements.dropZone.addEventListener("dragenter", (event) => {
   event.preventDefault();
@@ -631,3 +905,13 @@ document.querySelectorAll("input[type='number']").forEach((input) => {
 
 showEmptyPreview("Your sheet will appear here", "Add a photo to create the print layout.");
 renderLayout();
+detectWebpExportSupport().then((supported) => {
+  elements.webpOption.disabled = !supported;
+  elements.webpOption.textContent = supported ? "WebP - compact" : "WebP - unavailable here";
+  if (!supported && elements.outputFormat.value === "webp") {
+    elements.outputFormat.value = DEFAULTS.outputFormat;
+    renderLayout();
+  } else {
+    updateFormatControl();
+  }
+});
