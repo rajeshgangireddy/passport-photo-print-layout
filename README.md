@@ -4,7 +4,7 @@ Tile a single passport / ID / visa photo onto a standard **10x15 cm (4x6")**
 print sheet, ready to upload to a self-service photo kiosk or print
 machine (e.g. Kruidvat, dm, CEWE, Walgreens, etc.) as a normal 10x15 photo.
 
-- **100% local** — a small Python script using only [Pillow](https://pillow.readthedocs.io/). No cloud upload, no web service, your photo never leaves your machine.
+- **Local processing** — the CLI uses [Pillow](https://pillow.readthedocs.io/); the browser tool uses Canvas. Neither uploads or sends your photo to a server.
 - Adds a thin **black border** around each photo.
 - Leaves a **tiny gap** between photos so you can cut them apart cleanly.
 - Auto-centers the grid on the sheet and picks portrait/landscape automatically to fit as many copies as possible (8x by default for a standard 35x45mm photo).
@@ -19,6 +19,40 @@ on a 10x15cm sheet:
 
 (The face above is a synthetic placeholder graphic used for documentation —
 not a real photo.)
+
+## Browser tool
+
+The static browser interface is published from `docs/`. The intended hosted
+URL is <https://rajeshgangireddy.github.io/passport-photo-print-layout/>; it
+will be available after GitHub Pages is enabled and the deployment workflow
+has completed successfully.
+
+To run it locally without a build step:
+
+```bash
+python3 -m http.server 8000 --directory docs
+```
+
+Then open <http://localhost:8000>, choose or drop a JPEG or PNG, set the photo
+and sheet dimensions, and download the generated JPG. The interface preserves
+the source aspect ratio without cropping, centers the layout, and includes the
+selected DPI in the JPEG's JFIF metadata. It supports standard 35 x 45 mm and
+US 50.8 x 50.8 mm photo presets, 10 x 15 cm, 13 x 18 cm, A4, and custom sizes.
+
+The browser processes the image locally with Canvas; it does not upload,
+transmit, or store the photo on a server. There are no analytics or external
+image-processing services. A 30 MB file limit and browser-safe image/output
+limits help avoid excessive memory use.
+
+### Enable GitHub Pages
+
+The workflow in `.github/workflows/deploy-pages.yml` publishes `docs/` when
+changes to the browser tool or workflow are pushed to `master`; it can also be
+started manually from the repository's **Actions** tab. To activate hosting,
+open **Settings > Pages**, select **GitHub Actions** as the build and
+deployment source, and save. After the first successful deployment, the
+hosted URL above will serve the browser tool. Pages has not been enabled or
+deployed as part of this change.
 
 ## Requirements
 
@@ -79,9 +113,10 @@ safety buffer for that.
 
 ## Privacy
 
-This tool does not upload, transmit, or log your photo anywhere. It only
-reads the input file and writes the output file you specify, on your own
-machine.
+The CLI reads the input photo and writes the output file on your machine. The
+browser tool draws the selected photo and generated sheet with local Canvas
+operations. Neither surface uploads, transmits, or logs the photo, and the
+browser UI does not include analytics or remote image-processing services.
 
 ## License
 
