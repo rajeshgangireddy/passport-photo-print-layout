@@ -2,7 +2,7 @@
 <!--
 THESIS: Make a print-ready passport-photo sheet without sending the source image anywhere.
 OWN-WORLD: Intel Geti's flat dark interface, Energy Blue actions, crisp borders, and system typography.
-STORY: Choose a photo, set physical sizes, inspect the centered sheet, and download a full-resolution JPEG.
+STORY: Choose a photo, set physical sizes, inspect the centered sheet, and download a full-resolution image.
 FIRST VIEWPORT: Settings and photo drop area sit left; the live sheet, measurements, and download sit right.
 FORM: Operate-mode split workspace, built directly from the approved brief; no seed or alternate staging.
 -->
@@ -11,7 +11,7 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#313236">
-    <meta name="description" content="Create a print-ready passport photo sheet entirely in your browser.">
+    <meta name="description" content="Create a print-ready passport photo sheet locally in your browser.">
     <title>Passport photo print layout</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="app.js"></script>
@@ -31,7 +31,7 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
     <main class="page-shell">
       <div class="page-intro">
         <h1>Build a print-ready photo sheet</h1>
-        <p>Set the physical size, check the layout, then download a full-resolution JPEG.</p>
+        <p>Set the physical size, check the layout, then download a print-ready image.</p>
       </div>
 
       <div class="workspace-grid">
@@ -59,7 +59,12 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
             <h3 id="controls-title">Sheet settings</h3>
 
             <div class="control-group">
-              <label class="field-label" for="photo-preset">Photo size</label>
+              <div class="field-heading">
+                <label class="field-label" for="photo-preset">Photo size</label>
+                <button class="reset-button" type="button" data-reset="photo-preset" aria-label="Reset photo size to standard 35 by 45 millimeters" title="Reset photo size">
+                  <span aria-hidden="true">↺</span>
+                </button>
+              </div>
               <select id="photo-preset">
                 <option value="35x45" selected>35 x 45 mm - Standard</option>
                 <option value="50.8x50.8">50.8 x 50.8 mm - US passport</option>
@@ -67,14 +72,24 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
               </select>
               <div class="field-pair">
                 <div class="number-field">
-                  <label for="photo-width">Width</label>
+                  <div class="field-heading">
+                    <label for="photo-width">Width</label>
+                    <button class="reset-button" type="button" data-reset="photo-width" aria-label="Reset photo width to 35 millimeters" title="Reset photo width">
+                      <span aria-hidden="true">↺</span>
+                    </button>
+                  </div>
                   <div class="number-input">
                     <input id="photo-width" type="number" min="0.1" max="500" step="0.1" value="35" disabled>
                     <span aria-hidden="true">mm</span>
                   </div>
                 </div>
                 <div class="number-field">
-                  <label for="photo-height">Height</label>
+                  <div class="field-heading">
+                    <label for="photo-height">Height</label>
+                    <button class="reset-button" type="button" data-reset="photo-height" aria-label="Reset photo height to 45 millimeters" title="Reset photo height">
+                      <span aria-hidden="true">↺</span>
+                    </button>
+                  </div>
                   <div class="number-input">
                     <input id="photo-height" type="number" min="0.1" max="500" step="0.1" value="45" disabled>
                     <span aria-hidden="true">mm</span>
@@ -84,7 +99,12 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
             </div>
 
             <div class="control-group">
-              <label class="field-label" for="page-preset">Print sheet</label>
+              <div class="field-heading">
+                <label class="field-label" for="page-preset">Print sheet</label>
+                <button class="reset-button" type="button" data-reset="page-preset" aria-label="Reset sheet size to 100 by 150 millimeters" title="Reset sheet size">
+                  <span aria-hidden="true">↺</span>
+                </button>
+              </div>
               <select id="page-preset">
                 <option value="100x150" selected>10 x 15 cm - 4R</option>
                 <option value="130x180">13 x 18 cm</option>
@@ -93,14 +113,24 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
               </select>
               <div class="field-pair">
                 <div class="number-field">
-                  <label for="page-width">Width</label>
+                  <div class="field-heading">
+                    <label for="page-width">Width</label>
+                    <button class="reset-button" type="button" data-reset="page-width" aria-label="Reset sheet width to 100 millimeters" title="Reset sheet width">
+                      <span aria-hidden="true">↺</span>
+                    </button>
+                  </div>
                   <div class="number-input">
                     <input id="page-width" type="number" min="20" max="500" step="0.1" value="100" disabled>
                     <span aria-hidden="true">mm</span>
                   </div>
                 </div>
                 <div class="number-field">
-                  <label for="page-height">Height</label>
+                  <div class="field-heading">
+                    <label for="page-height">Height</label>
+                    <button class="reset-button" type="button" data-reset="page-height" aria-label="Reset sheet height to 150 millimeters" title="Reset sheet height">
+                      <span aria-hidden="true">↺</span>
+                    </button>
+                  </div>
                   <div class="number-input">
                     <input id="page-height" type="number" min="20" max="500" step="0.1" value="150" disabled>
                     <span aria-hidden="true">mm</span>
@@ -111,28 +141,48 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
 
             <div class="field-pair">
               <div class="number-field">
-                <label for="border-width">Border</label>
+                <div class="field-heading">
+                  <label for="border-width">Border</label>
+                  <button class="reset-button" type="button" data-reset="border-width" aria-label="Reset border width to 0.5 millimeters" title="Reset border width">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <div class="number-input">
                   <input id="border-width" type="number" min="0" max="20" step="0.1" value="0.5">
                   <span aria-hidden="true">mm</span>
                 </div>
               </div>
               <div class="number-field">
-                <label for="border-color">Border color</label>
+                <div class="field-heading">
+                  <label for="border-color">Border color</label>
+                  <button class="reset-button" type="button" data-reset="border-color" aria-label="Reset border color to black" title="Reset border color">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <input class="color-input" id="border-color" type="color" value="#000000">
               </div>
             </div>
 
             <div class="field-pair">
               <div class="number-field">
-                <label for="photo-gap">Gap</label>
+                <div class="field-heading">
+                  <label for="photo-gap">Gap</label>
+                  <button class="reset-button" type="button" data-reset="photo-gap" aria-label="Reset gap to 1 millimeter" title="Reset gap">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <div class="number-input">
                   <input id="photo-gap" type="number" min="0" max="50" step="0.1" value="1">
                   <span aria-hidden="true">mm</span>
                 </div>
               </div>
               <div class="number-field">
-                <label for="page-margin">Margin</label>
+                <div class="field-heading">
+                  <label for="page-margin">Margin</label>
+                  <button class="reset-button" type="button" data-reset="page-margin" aria-label="Reset margin to 1.5 millimeters" title="Reset margin">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <div class="number-input">
                   <input id="page-margin" type="number" min="0" max="50" step="0.1" value="1.5">
                   <span aria-hidden="true">mm</span>
@@ -142,14 +192,24 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
 
             <div class="field-pair">
               <div class="number-field">
-                <label for="resolution">Resolution</label>
+                <div class="field-heading">
+                  <label for="resolution">Resolution</label>
+                  <button class="reset-button" type="button" data-reset="resolution" aria-label="Reset resolution to 300 DPI" title="Reset resolution">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <div class="number-input">
                   <input id="resolution" type="number" min="72" max="600" step="1" value="300">
                   <span aria-hidden="true">DPI</span>
                 </div>
               </div>
               <div class="number-field">
-                <label for="orientation">Orientation</label>
+                <div class="field-heading">
+                  <label for="orientation">Orientation</label>
+                  <button class="reset-button" type="button" data-reset="orientation" aria-label="Reset orientation to automatic" title="Reset orientation">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
                 <select id="orientation">
                   <option value="auto" selected>Auto fit</option>
                   <option value="portrait">Portrait</option>
@@ -159,7 +219,12 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
             </div>
 
             <fieldset class="copy-options">
-              <legend>Number of copies</legend>
+              <legend>
+                Number of copies
+                <button class="reset-button" type="button" data-reset="copy-mode" aria-label="Reset copy settings to fill the sheet" title="Reset copy settings">
+                  <span aria-hidden="true">↺</span>
+                </button>
+              </legend>
               <div class="radio-choice">
                 <input id="fill-sheet" name="copy-mode" type="radio" value="fill" checked>
                 <label for="fill-sheet">Fill available slots</label>
@@ -167,7 +232,12 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
               <div class="radio-choice">
                 <input id="limit-copies" name="copy-mode" type="radio" value="limit">
                 <label for="limit-copies">Set a maximum</label>
-                <input id="copy-count" class="copy-count" type="number" min="1" max="9999" step="1" value="4" aria-label="Maximum number of copies" disabled>
+                <div class="copy-count-control">
+                  <input id="copy-count" class="copy-count" type="number" min="1" max="9999" step="1" value="4" aria-label="Maximum number of copies" disabled>
+                  <button class="reset-button" type="button" data-reset="copy-count" aria-label="Reset maximum copies to 4" title="Reset maximum copies">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
               </div>
             </fieldset>
             <p class="background-note">Sheet background: white</p>
@@ -179,7 +249,23 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
             <div>
               <h2 id="preview-title">Print sheet</h2>
             </div>
-            <button class="button button-primary" id="download-image" type="button" disabled>Download JPG</button>
+            <div class="download-actions">
+              <div class="format-field">
+                <div class="field-heading">
+                  <label for="output-format">File format</label>
+                  <button class="reset-button" type="button" data-reset="format" aria-label="Reset file format to JPEG" title="Reset file format">
+                    <span aria-hidden="true">↺</span>
+                  </button>
+                </div>
+                <select id="output-format" aria-describedby="format-help">
+                  <option value="jpeg" selected>JPEG - kiosk friendly</option>
+                  <option value="png">PNG - lossless</option>
+                  <option value="webp" disabled>WebP - checking support</option>
+                </select>
+                <p class="format-help" id="format-help">JPEG is widely accepted and embeds print DPI.</p>
+              </div>
+              <button class="button button-primary" id="download-image" type="button" disabled>Download JPEG</button>
+            </div>
           </div>
 
           <div class="preview-stage" id="preview-stage">
@@ -227,24 +313,28 @@ FORM: Operate-mode split workspace, built directly from the approved brief; no s
               <dt>Orientation</dt>
               <dd id="summary-orientation">-</dd>
             </div>
+            <div>
+              <dt>File format</dt>
+              <dd id="summary-format">JPEG</dd>
+            </div>
           </dl>
 
           <aside class="print-advice" aria-labelledby="print-advice-title">
             <h3 id="print-advice-title">At the photo kiosk</h3>
-            <p>Order this exact sheet size. Turn off fit-to-page, crop, and auto-enhance options where available so the photos keep their intended size.</p>
+            <p>For the broadest kiosk support, choose JPEG and order this exact sheet size. Turn off fit-to-page, crop, and auto-enhance options where available.</p>
           </aside>
         </section>
       </div>
 
       <aside class="privacy-note" aria-label="Privacy">
         <span class="privacy-lock" aria-hidden="true"></span>
-        <p><strong>Your photo never leaves this device.</strong> The image is processed with browser Canvas only. Nothing is uploaded, transmitted, or stored by a server.</p>
+        <p><strong>Your photo never leaves</strong> your device. It is processed on your machine, in this browser, using Canvas only. Nothing is uploaded, sent, or stored by a server.</p>
       </aside>
     </main>
 
     <footer class="site-footer">
       <span>Passport photo print layout</span>
-      <span>JPEG and PNG supported</span>
+      <span>JPEG and PNG · WebP where supported</span>
     </footer>
   </body>
 </html>

@@ -22,10 +22,8 @@ not a real photo.)
 
 ## Browser tool
 
-The static browser interface is published from `docs/`. The intended hosted
-URL is <https://rajeshgangireddy.github.io/passport-photo-print-layout/>; it
-will be available after GitHub Pages is enabled and the deployment workflow
-has completed successfully.
+The static browser interface is published from `docs/` at
+<https://rajeshgangireddy.github.io/passport-photo-print-layout/>.
 
 To run it locally without a build step:
 
@@ -34,25 +32,25 @@ python3 -m http.server 8000 --directory docs
 ```
 
 Then open <http://localhost:8000>, choose or drop a JPEG or PNG, set the photo
-and sheet dimensions, and download the generated JPG. The interface preserves
-the source aspect ratio without cropping, centers the layout, and includes the
-selected DPI in the JPEG's JFIF metadata. It supports standard 35 x 45 mm and
-US 50.8 x 50.8 mm photo presets, 10 x 15 cm, 13 x 18 cm, A4, and custom sizes.
+and sheet dimensions, and download a JPEG, PNG, or WebP. The interface
+preserves the source aspect ratio without cropping, centers the layout, and
+includes the selected DPI in JPEG and PNG metadata. WebP is compact but does
+not embed print DPI and may not be accepted by every kiosk; the format is
+offered only when the browser supports WebP export. It supports
+standard 35 x 45 mm and US 50.8 x 50.8 mm photo presets, 10 x 15 cm, 13 x 18
+cm, A4, and custom sizes.
 
-The browser processes the image locally with Canvas; it does not upload,
-transmit, or store the photo on a server. There are no analytics or external
-image-processing services. A 30 MB file limit and browser-safe image/output
-limits help avoid excessive memory use.
+Your photo never leaves your device. It is processed on your machine, in this
+browser, using Canvas only. Nothing is uploaded, sent, or stored by a server;
+there are no analytics or external image-processing services. A 30 MB file
+limit and browser-safe image/output limits help avoid excessive memory use.
 
 ### Enable GitHub Pages
 
 The workflow in `.github/workflows/deploy-pages.yml` publishes `docs/` when
 changes to the browser tool or workflow are pushed to `master`; it can also be
-started manually from the repository's **Actions** tab. To activate hosting,
-open **Settings > Pages**, select **GitHub Actions** as the build and
-deployment source, and save. After the first successful deployment, the
-hosted URL above will serve the browser tool. Pages has not been enabled or
-deployed as part of this change.
+started manually from the repository's **Actions** tab. GitHub Pages is
+configured to use **GitHub Actions** as its build and deployment source.
 
 ## Requirements
 
@@ -113,10 +111,11 @@ safety buffer for that.
 
 ## Privacy
 
-The CLI reads the input photo and writes the output file on your machine. The
-browser tool draws the selected photo and generated sheet with local Canvas
-operations. Neither surface uploads, transmits, or logs the photo, and the
-browser UI does not include analytics or remote image-processing services.
+The CLI reads the input photo and writes the output file on your machine. In
+the browser tool, your photo never leaves your device: it is processed on
+your machine, in this browser, using local Canvas operations. Neither surface
+uploads, transmits, or logs the photo, and the browser UI does not include
+analytics or remote image-processing services.
 
 ## License
 
